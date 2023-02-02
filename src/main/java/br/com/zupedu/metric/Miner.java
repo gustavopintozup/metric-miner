@@ -1,5 +1,10 @@
 package br.com.zupedu.metric;
 
+import java.util.List;
+
+import br.com.zupedu.metric.git.GitCommit;
+import br.com.zupedu.metric.git.GitMiner;
+import br.com.zupedu.metric.git.GitMinerException;
 import picocli.CommandLine;
 import picocli.CommandLine.Option;
 
@@ -17,9 +22,14 @@ public class Miner implements Runnable {
     @Override
     public void run() {
         try {
-            System.out.println("Teste miner: " + path);
-        } catch (RuntimeException e) {
-            System.out.println("[ERROR] Bla bla");
+            var gitrepo = new GitMiner(path);
+            List<GitCommit> commits = gitrepo.navigateCommits();
+            for (GitCommit commit : commits) {
+                System.out.println(commit);
+            }
+
+        } catch (GitMinerException e) {
+            e.printStackTrace();
         }
     }
 }

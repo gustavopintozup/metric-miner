@@ -30,7 +30,7 @@ public class GitMiner {
         }
     }
 
-    public List<GitCommit> getCommits() {
+    public List<GitCommit> navigateCommits() {
         LogCommand logCommand = git.log();
         logCommand.setMaxCount(150);
         try {
