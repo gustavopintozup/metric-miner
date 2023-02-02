@@ -14,9 +14,8 @@ public class GitCommit {
         this.author = author;
     }
 
-    @Override
-    public String toString() {
-        return "["+ hash + ", " + author.getEmailAddress() + ", " + message + "]";
+    public String getHash() {
+        return this.hash;
     }
 
     public String getAuthorEmail() {
@@ -25,5 +24,11 @@ public class GitCommit {
 
     public String getAuthorName() {
         return author.getName();
+    }
+
+
+    @Override
+    public String toString() {
+        return "["+ hash + ", " + author.getEmailAddress() + ", " + message + "]";
     }
 }

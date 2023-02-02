@@ -8,6 +8,7 @@ import java.util.List;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -38,6 +39,7 @@ public class GitMiner {
             List<GitCommit> commits = new ArrayList<>();
 
             for (RevCommit rev : logs) {
+
                 var commit = new GitCommit(rev.getId().getName(),
                         rev.getFullMessage(),
                         rev.getAuthorIdent());
@@ -46,8 +48,62 @@ public class GitMiner {
             return commits;
 
         } catch (GitAPIException e) {
-            throw new GitMinerException("Nâo foi possível listar os commits: " + e.getMessage()); 
+            throw new GitMinerException("We could not retrieve the commits information: " + e.getMessage());
+        }
+    }
+
+    public Ref checkout(GitCommit commit) {
+        try {
+            return git.checkout()
+                    .setStartPoint(commit.getHash())
+                    .setCreateBranch(true)
+                    .setName(commit.getHash())
+                    .call();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            throw new GitMinerException("We were unable to change revision! " + e.getMessage());
+        }
+    }
+
+    private void checkingOutToMain() throws GitAPIException {
+        git.checkout().setName("main").call();
+    }
+
+    private void removingAllBranchesButMain() throws GitAPIException {
+
+        List<Ref> branches = git.branchList().call();
+        Ref main = null;
+        for (Ref branch : branches) {
+            if (branch.getName().endsWith("main")) {
+                main = branch;
+                break;
+            }
         }
 
+        for (Ref branch : branches) {
+            if (!branch.equals(main)) {
+                git.branchDelete().setBranchNames(branch.getName()).call();
+            }
+        }
+    }
+
+    public void cleaningStuff() {
+        try {
+            checkingOutToMain();
+            removingAllBranchesButMain();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void cleanAndBacktoHead(GitCommit commit) {
+        try {
+            git.checkout().setName("main").call();
+            git.branchDelete().setBranchNames(commit.getHash()).call();
+        } catch (GitAPIException e) {
+            throw new GitMinerException(
+                    "We were unable to remove the branch [" + commit.getHash() + "] " + e.getMessage());
+        }
     }
 }

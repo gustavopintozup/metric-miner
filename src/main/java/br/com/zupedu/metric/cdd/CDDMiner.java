@@ -43,7 +43,8 @@ public class CDDMiner {
 
         spoon.run();
 
-        return new PrintMetrics(config, context, true).as(Format.JSON).print();
+        var metrics = new PrintMetrics(config, context, true);
 
+        return metrics.as(Format.JSON).print();
     }
 }

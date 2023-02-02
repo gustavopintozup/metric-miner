@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 
+import org.eclipse.jgit.lib.Ref;
 import org.junit.jupiter.api.Test;
 
 public class GitMinerTest {
-
     @Test
-    public void testName() throws Exception {
+    public void testName() {
         GitMiner miner = new GitMiner("/home/gustavopinto/workspace/poc-plugin-cdd");
+
         assertNotNull(miner);
 
         List<GitCommit> commits = miner.navigateCommits();
@@ -23,5 +24,20 @@ public class GitMinerTest {
         assertEquals("Gustavo Pinto", commit.getAuthorName());
 
         assertEquals(71, commits.size());
+    }
+
+    @Test
+    public void testCheckingIfItChangesRevision() {
+        GitMiner miner = new GitMiner("/home/gustavopinto/workspace/poc-plugin-cdd");
+
+        List<GitCommit> commits = miner.navigateCommits();
+        GitCommit firstCommit = commits.get(commits.size() - 1);
+        assertNotNull(firstCommit);
+        assertNotNull(firstCommit.getHash());
+
+        Ref ref = miner.checkout(firstCommit);
+        assertNotNull(ref);
+
+        miner.cleanAndBacktoHead(firstCommit);
     }
 }
